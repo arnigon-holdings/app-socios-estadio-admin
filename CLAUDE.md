@@ -1,5 +1,7 @@
 # CLAUDE.md — admin_panel
 
+> Antes de proponer cualquier cambio, **lee `/AGENTS.md` completo**. Define reglas cross-cutting (calidad, seguridad, capa tecnológica oculta, etc.) que aplican también a este panel.
+
 ## Project Overview
 
 React frontend para panel de administración de App Socios Estadio.
@@ -12,6 +14,10 @@ React frontend para panel de administración de App Socios Estadio.
 | Variable | Dev | Production (GCP) |
 |----------|-----|------------------|
 | `VITE_API_BASE_URL` | `http://localhost:3000` | `https://api.appservicios.cl` |
+| `VITE_FACE_SEARCH_URL` | `http://localhost:8081` | `https://face-search-run.hereiam.run` |
+| `VITE_FACE_SEARCH_TOKEN` | `dev-face-search-token` | `<secret>` |
+| `VITE_ADMIN_EMAIL` | `admin@appperfil.cl` | - |
+| `VITE_ADMIN_PASSWORD` | `Admin123!` | - |
 
 Crear `.env.local` para desarrollo y `.env.production` para producción.
 
@@ -29,44 +35,59 @@ npm run preview      # Preview build
 
 ### Auth (admin)
 ```
-POST /api/admin/login
-DELETE /api/admin/logout
-GET  /api/admin/dashboard
+POST /api/v1/admin/login
+DELETE /api/v1/admin/logout
+GET  /api/v1/admin/dashboard
 ```
 
 ### Users
 ```
-GET  /api/admin/users
-GET  /api/admin/users/:id
-PATCH /api/admin/users/:id
-DELETE /api/admin/users/:id
+GET  /api/v1/admin/users
+GET  /api/v1/admin/users/:id
+PATCH /api/v1/admin/users/:id
+DELETE /api/v1/admin/users/:id
 ```
 
 ### Teams
 ```
-GET    /api/admin/teams
-POST   /api/admin/teams
-PATCH  /api/admin/teams/:id
-DELETE /api/admin/teams/:id
+GET    /api/v1/admin/teams
+POST   /api/v1/admin/teams
+PATCH  /api/v1/admin/teams/:id
+DELETE /api/v1/admin/teams/:id
 ```
 
 ### Point Actions
 ```
-GET    /api/admin/point_actions
-POST   /api/admin/point_actions
-PATCH  /api/admin/point_actions/:id
-DELETE /api/admin/point_actions/:id
+GET    /api/v1/admin/point_actions
+POST   /api/v1/admin/point_actions
+PATCH  /api/v1/admin/point_actions/:id
+DELETE /api/v1/admin/point_actions/:id
 ```
 
 ### Transactions
 ```
-GET /api/admin/point_transactions
+GET /api/v1/admin/point_transactions
 ```
 
 ### Audit Logs
 ```
-GET /api/admin/audit_logs
+GET /api/v1/admin/audit_logs
 ```
+
+### Face Records
+```
+GET /api/v1/admin/users/:id/face-records
+POST /api/v1/admin/users/:id/reindex-face
+```
+
+### Face Search (external Go Service)
+```
+POST http://localhost:8081/search-face
+Headers: Authorization: Bearer <FACE_SEARCH_TOKEN>
+Body: { "image": "data:image/jpeg;base64,..." }
+```
+
+**Auth:** Token compartido via `FACE_SEARCH_TOKEN` env var.
 
 ## Arquitectura
 
@@ -87,7 +108,8 @@ src/
 │   ├── teams.tsx
 │   ├── point-actions.tsx
 │   ├── transactions.tsx
-│   └── audit-logs.tsx
+│   ├── audit-logs.tsx
+│   └── face-search.tsx
 ├── routes/
 │   └── index.tsx     # Router con rutas protegidas
 └── types/
@@ -102,9 +124,6 @@ src/
 4. Asegurar que `VITE_API_BASE_URL` apunte al backend en producción
 5. El backend debe tener CORS configurado con el dominio del admin_panel
 
-## Credenciales Admin (desarrollo)
+## Credenciales Admin
 
-```
-Email: admin@appperfil.cl
-Password: Admin123!
-```
+Configurables via variables de entorno `VITE_ADMIN_EMAIL` y `VITE_ADMIN_PASSWORD`.

@@ -8,6 +8,7 @@ import { TeamsPage } from '@/pages/teams'
 import { PointActionsPage } from '@/pages/point-actions'
 import { TransactionsPage } from '@/pages/transactions'
 import { AuditLogsPage } from '@/pages/audit-logs'
+import { FaceSearchPage } from '@/pages/face-search'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -131,6 +132,16 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <LayoutWithSidebar>
           <AuditLogsPage />
+        </LayoutWithSidebar>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/face-search',
+    element: (
+      <ProtectedRoute>
+        <LayoutWithSidebar>
+          <FaceSearchPage />
         </LayoutWithSidebar>
       </ProtectedRoute>
     ),

@@ -10,11 +10,13 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  ScanFace,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/users', label: 'Usuarios', icon: Users },
+  { href: '/face-search', label: 'Búsqueda Facial', icon: ScanFace },
   { href: '/teams', label: 'Equipos', icon: Trophy },
   { href: '/point-actions', label: 'Puntos', icon: Activity },
   { href: '/transactions', label: 'Transacciones', icon: FileText },

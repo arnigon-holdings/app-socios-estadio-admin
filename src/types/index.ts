@@ -13,12 +13,14 @@ export interface User {
   teams_ids: number[]
   photo_url: string
   referral_code: string
+  registration_status: string
   created_at: string
   consents?: Record<string, boolean>
   metadata?: Record<string, unknown>
   points_balance?: number
   updated_at?: string
   phone_verified?: boolean
+  biometric_status?: string
 }
 
 export interface Team {
@@ -82,4 +84,28 @@ export interface Pagination {
 
 export interface ApiError {
   error: string | string[]
+}
+
+export interface FaceSearchMatch {
+  user_id: string
+  rut: string
+  phone: string
+  confidence: number
+  face_id?: string
+  photo_url?: string
+}
+
+export interface FaceRecord {
+  id: number
+  rekognition_face_id: string
+  s3_bucket: string
+  s3_key: string
+  face_type?: 'reference' | 'audit' | null
+  indexed_at: string
+  photo_url: string | null
+}
+
+export interface FaceSearchResponse {
+  matches: FaceSearchMatch[]
+  query_time_ms: number
 }
