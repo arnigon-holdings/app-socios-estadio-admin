@@ -2,7 +2,7 @@
 
 SPA React 19 + Vite 6 + Tailwind v4 + shadcn/ui + TanStack Query. Lo usan los admins del club para gestionar socios, equipos, puntos y buscar caras.
 
-> **Contexto completo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), [`/SPEC.md`](../../SPEC.md).
+> **Contexto completo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), [`/SPEC.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/SPEC.md) (en el docs repo).
 
 ## Quickstart
 
@@ -151,7 +151,7 @@ Estos valores se usan **solo como placeholder** en el form de login. La auth rea
 
 ## Gotchas
 
-- **El Vite proxy (`/api → localhost:3000`) solo aplica al backend Rails**. Para `/search-face` no hay proxy — el cliente llama directo a `VITE_FACE_SEARCH_URL`. Esto es por diseño (ver `ARCHITECTURE.md`).
+- **El Vite proxy (`/api → localhost:3000`) solo aplica al backend Rails**. Para `/search-face` no hay proxy — el cliente llama directo a `VITE_FACE_SEARCH_URL`. Esto es por diseño (ver [`ARCHITECTURE.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/ARCHITECTURE.md)).
 - **CORS**: el Go service valida `CORS_ORIGINS` env. Para dev debe incluir `http://localhost:5174`.
 - **Las URLs presigned de S3 expiran en 1h**. Si el admin deja la página abierta, las imágenes se rompen al refrescar — la búsqueda las regenera.
 - **`VITE_FACE_SEARCH_TOKEN` se expone al bundle**. Es un secret compartido Go ↔ admin. En prod rotarlo regularmente y considerar emisión server-side.
