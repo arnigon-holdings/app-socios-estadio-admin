@@ -95,15 +95,59 @@ npm run test         # playwright
 
 ## Env vars
 
-`VITE_*`:
+Toda configuración viene de variables de entorno `VITE_*` (expuestas al bundle en build time). **No hay secretos hardcodeados en código**.
 
-| Var | Descripción |
-|---|---|
-| `VITE_API_BASE_URL` | URL del backend Rails |
-| `VITE_FACE_SEARCH_URL` | URL del servicio Go face-search |
-| `VITE_FACE_SEARCH_TOKEN` | Bearer token compartido con Go service |
-| `VITE_ADMIN_EMAIL` | Email del admin (default seed) |
-| `VITE_ADMIN_PASSWORD` | Password del admin (solo dev) |
+### Archivos de configuración
+
+| Archivo | Estado | Propósito |
+|---|---|---|
+| `admin/.env.example` | tracked | Template con todas las variables (placeholders) |
+| `admin/.env.development` | tracked (sin secretos reales) | Defaults de dev — el dev server arranca con valores placeholder |
+| `admin/.env.production` | gitignored | Build de prod con valores reales (deploy lo setea) |
+| `admin/.env.local` | gitignored | Override local — Vite lo lee pero no lo commitea |
+
+> **Vite solo lee `.env`, `.env.local`, `.env.development`, `.env.production`**. Las variables deben tener el prefijo `VITE_` para ser accesibles (`import.meta.env.VITE_*`).
+
+### Tabla de variables
+
+#### Backend API (Rails)
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | sí | `http://localhost:3000` | URL del backend Rails. Llamadas fetch en `src/lib/api.ts`. |
+
+#### Go face-search service
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_FACE_SEARCH_URL` | sí | `http://localhost:8081` | URL del Go service (`/search-face` endpoint) |
+| `VITE_FACE_SEARCH_TOKEN` | sí | — | Bearer token compartido con Go service. **Si está vacío, `/face-search` lanza error** (`admin/src/lib/api.ts:50`). |
+
+> Leídos en `src/lib/api.ts` → `searchFaceRequest()`.
+
+#### Credenciales admin dev (placeholder UI)
+
+Estos valores se usan **solo como placeholder** en el form de login. La auth real la hace el backend contra la tabla `admins` (seed passwords desde `backend/.env.development`).
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_ADMIN_EMAIL` | no | — | Email que aparece como placeholder en el input del login |
+| `VITE_ADMIN_PASSWORD` | no | — | **No se usa en runtime** — solo el campo `VITE_ADMIN_EMAIL` es referenciado. El campo password no tiene placeholder para no sugerir nada. |
+
+> Si querés un placeholder distinto en el input email, setear `VITE_ADMIN_EMAIL`. En producción, dejar vacío (el form se renderiza sin sugerencia).
+
+### Dónde cambiar cada clave (resumen rápido)
+
+- **Cambiar URL del backend**: `VITE_API_BASE_URL` en `.env.development` (dev) o `.env.production` (build). Requiere rebuild.
+- **Cambiar URL del Go face-search**: `VITE_FACE_SEARCH_URL`. Rebuild.
+- **Rotar token face-search**: `VITE_FACE_SEARCH_TOKEN` aquí + en `face-search-service/.env.development` (dev) o Secret Manager (prod). Mismo valor en ambos lados (token compartido).
+- **Cambiar el email placeholder del login**: `VITE_ADMIN_EMAIL`. Rebuild (es build-time).
+
+### Gotchas
+
+- **`VITE_FACE_SEARCH_TOKEN` se expone al bundle**. Es un secret compartido Go ↔ admin. En prod rotar regularmente y considerar emisión server-side.
+- **Cambiar cualquier `VITE_*` requiere restart del dev server** o rebuild para prod.
+- **El `/face-search` requiere login**. Si redirige a `/login`, normal. La página nunca debe exponer resultados sin auth.
 
 ## Gotchas
 
