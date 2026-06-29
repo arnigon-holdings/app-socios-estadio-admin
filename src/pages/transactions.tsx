@@ -21,7 +21,7 @@ export function TransactionsPage() {
   }>({
     queryKey: ['transactions', page, userIdFilter],
     queryFn: () =>
-      api.get('/api/admin/point_transactions', {
+      api.get('/api/v1/admin/point_transactions', {
         params: {
           page,
           per_page: 20,

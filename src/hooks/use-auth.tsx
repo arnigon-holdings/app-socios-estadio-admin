@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const data = await api.get<{ admin: Admin }>('/api/admin/dashboard')
+      const data = await api.get<{ admin: Admin }>('/api/v1/admin/dashboard')
       setAdmin(data.admin || null)
     } catch {
       setAdmin(null)
@@ -29,14 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    const data = await api.post<{ admin: Admin }>('/api/admin/login', {
+    const data = await api.post<{ admin: Admin }>('/api/v1/admin/login', {
       session: { email, password }
     })
     setAdmin(data.admin)
   }
 
   const logout = async () => {
-    await api.delete('/api/admin/logout')
+    await api.delete('/api/v1/admin/logout')
     setAdmin(null)
   }
 

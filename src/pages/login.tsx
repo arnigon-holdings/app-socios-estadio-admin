@@ -58,7 +58,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@appperfil.cl"
+                placeholder={import.meta.env.VITE_ADMIN_EMAIL || 'admin@example.com'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

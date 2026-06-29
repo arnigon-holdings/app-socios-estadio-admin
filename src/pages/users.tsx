@@ -9,8 +9,16 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Loader2 } from 'lucide-react'
-import type { User, Pagination } from '@/types'
+import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Loader2, CheckCircle, XCircle, ScanFace } from 'lucide-react'
+import type { User, Pagination, FaceRecord } from '@/types'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+
+const STATUS_LABELS: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'secondary' }> = {
+  pending_verification: { label: 'Pendiente', variant: 'warning' },
+  verified: { label: 'Verificado', variant: 'success' },
+  rejected: { label: 'Rechazado', variant: 'destructive' },
+}
 
 export function UsersPage() {
   const queryClient = useQueryClient()
@@ -22,17 +30,32 @@ export function UsersPage() {
   const { data, isLoading } = useQuery<{ users: User[]; pagination: Pagination }>({
     queryKey: ['users', page, rutFilter],
     queryFn: () =>
-      api.get('/api/admin/users', {
+      api.get('/api/v1/admin/users', {
         params: { page, per_page: 20, rut: rutFilter || undefined },
       }),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (userId: number) => api.delete(`/api/admin/users/${userId}`),
+    mutationFn: (userId: number) => api.delete(`/api/v1/admin/users/${userId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setDeleteUser(null)
     },
+  })
+
+  const verifyMutation = useMutation({
+    mutationFn: ({ userId, status }: { userId: number; status: string }) =>
+      api.patch(`/api/v1/admin/users/${userId}`, { user: { registration_status: status } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      setSelectedUser(null)
+    },
+  })
+
+  const faceRecordsQuery = useQuery<{ face_records: FaceRecord[] }>({
+    queryKey: ['face-records', selectedUser?.id],
+    queryFn: () => api.get(`/api/v1/admin/users/${selectedUser!.id}/face_records`),
+    enabled: !!selectedUser,
   })
 
   const users = data?.users ?? []
@@ -66,10 +89,11 @@ export function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">Foto</TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>RUT</TableHead>
                 <TableHead>Teléfono</TableHead>
-                <TableHead>Verificado</TableHead>
+                <TableHead>Estado</TableHead>
                 <TableHead>Equipos</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -97,15 +121,23 @@ export function UsersPage() {
               ) : (
                 users.map((user) => (
                   <TableRow key={user.id}>
+                    <TableCell>
+                      <img
+                        src={`${API_BASE_URL}${user.photo_url}`}
+                        alt="Foto"
+                        className="h-10 w-10 rounded-full object-cover bg-muted"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + user.rut + '&background=random'
+                        }}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{user.id}</TableCell>
                     <TableCell>{user.rut}</TableCell>
                     <TableCell>{user.phone}</TableCell>
                     <TableCell>
-                      {user.phone_verified ? (
-                        <Badge variant="success">Verificado</Badge>
-                      ) : (
-                        <Badge variant="warning">Pendiente</Badge>
-                      )}
+                      <Badge variant={STATUS_LABELS[user.registration_status]?.variant || 'secondary'}>
+                        {STATUS_LABELS[user.registration_status]?.label || user.registration_status}
+                      </Badge>
                     </TableCell>
                     <TableCell>{user.teams_ids?.length ?? 0}</TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString('es-CL')}</TableCell>
@@ -165,13 +197,62 @@ export function UsersPage() {
 
       {/* User Detail Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Detalle de Usuario</DialogTitle>
             <DialogDescription>Información del usuario registrado</DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <div className="flex items-center gap-6">
+                <img
+                  src={`${API_BASE_URL}${selectedUser.photo_url}`}
+                  alt="Foto"
+                  className="h-32 w-32 rounded-xl object-cover bg-muted"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + selectedUser.rut + '&background=random&size=128'
+                  }}
+                />
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-muted-foreground">Estado de registro</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant={STATUS_LABELS[selectedUser.registration_status]?.variant || 'secondary'} className="text-sm">
+                        {STATUS_LABELS[selectedUser.registration_status]?.label || selectedUser.registration_status}
+                      </Badge>
+                      {selectedUser.points_balance !== undefined && (
+                        <span className="text-sm font-medium">
+                          • {selectedUser.points_balance} puntos
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {selectedUser.registration_status !== 'verified' && (
+                      <Button
+                        size="sm"
+                        onClick={() => verifyMutation.mutate({ userId: selectedUser.id, status: 'verified' })}
+                        disabled={verifyMutation.isPending}
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Verificar
+                      </Button>
+                    )}
+                    {selectedUser.registration_status !== 'rejected' && selectedUser.registration_status !== 'verified' && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => verifyMutation.mutate({ userId: selectedUser.id, status: 'rejected' })}
+                        disabled={verifyMutation.isPending}
+                      >
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Rechazar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">ID</Label>
@@ -186,8 +267,8 @@ export function UsersPage() {
                   <p className="font-medium">{selectedUser.phone}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Verificado</Label>
-                  <p className="font-medium">{selectedUser.phone_verified ? 'Sí' : 'No'}</p>
+                  <Label className="text-muted-foreground">Verificación biométrica</Label>
+                  <p className="font-medium capitalize">{selectedUser.biometric_status || 'N/A'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Fecha de registro</Label>
@@ -207,6 +288,64 @@ export function UsersPage() {
                   <Label className="text-muted-foreground">Mes de nacimiento</Label>
                   <p className="font-medium">{selectedUser.birth_month}/{selectedUser.birth_year}</p>
                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <ScanFace className="h-4 w-4 text-muted-foreground" />
+                  <Label className="text-muted-foreground">Caras registradas</Label>
+                  {faceRecordsQuery.data && (
+                    <Badge variant="secondary" className="text-xs">
+                      {faceRecordsQuery.data.face_records.length}
+                    </Badge>
+                  )}
+                </div>
+                {faceRecordsQuery.isLoading ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="aspect-square w-full rounded-lg" />
+                    ))}
+                  </div>
+                ) : faceRecordsQuery.data?.face_records.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center border rounded-lg border-dashed">
+                    Sin caras indexadas
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {faceRecordsQuery.data?.face_records.map((face) => (
+                      <a
+                        key={face.id}
+                        href={face.photo_url || '#'}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group relative block aspect-square overflow-hidden rounded-lg border bg-muted"
+                      >
+                        {face.photo_url ? (
+                          <img
+                            src={face.photo_url}
+                            alt={`Cara ${face.face_type ?? 'registrada'}`}
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none'
+                            }}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                            Sin imagen
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5">
+                          <p className="text-xs font-medium text-white capitalize">
+                            {face.face_type ?? 'referencia'}
+                          </p>
+                          <p className="text-[10px] text-white/80">
+                            {new Date(face.indexed_at).toLocaleDateString('es-CL')}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
