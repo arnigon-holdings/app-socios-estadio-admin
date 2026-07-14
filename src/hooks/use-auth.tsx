@@ -11,33 +11,53 @@ interface AuthContextType {
   checkAuth: () => Promise<void>
 }
 
+const STORAGE_KEY = 'admin_session'
+
 const AuthContext = createContext<AuthContextType | null>(null)
 
+function loadStoredAdmin(): Admin | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? (JSON.parse(stored) as Admin) : null
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [admin, setAdmin] = useState<Admin | null>(null)
+  const [admin, setAdmin] = useState<Admin | null>(loadStoredAdmin)
   const [isLoading, setIsLoading] = useState(true)
 
   const checkAuth = useCallback(async () => {
+    const storedAdmin = loadStoredAdmin()
+    if (!storedAdmin) {
+      setIsLoading(false)
+      return
+    }
     try {
-      const data = await api.get<{ admin: Admin }>('/api/v1/admin/dashboard')
-      setAdmin(data.admin || null)
+      await api.get('/api/admin/dashboard')
+      setAdmin(storedAdmin)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedAdmin))
     } catch {
       setAdmin(null)
+      localStorage.removeItem(STORAGE_KEY)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   const login = async (email: string, password: string) => {
-    const data = await api.post<{ admin: Admin }>('/api/v1/admin/login', {
+    const data = await api.post<{ admin: Admin }>('/api/admin/login', {
       session: { email, password }
     })
     setAdmin(data.admin)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data.admin))
   }
 
   const logout = async () => {
-    await api.delete('/api/v1/admin/logout')
+    await api.delete('/api/admin/logout')
     setAdmin(null)
+    localStorage.removeItem(STORAGE_KEY)
   }
 
   useEffect(() => {
