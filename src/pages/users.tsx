@@ -357,13 +357,13 @@ export function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Unlink Confirmation Dialog */}
       <Dialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Usuario</DialogTitle>
+            <DialogTitle>Desvincular Usuario</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de eliminar al usuario {deleteUser?.rut}? Esta acción no se puede deshacer.
+              ¿Estás seguro de desvincular al usuario {deleteUser?.rut}? Su RUT se borrar&aacute; pero las caras en el sistema permanecer&aacute;n para una posible reasociaci&oacute;n futura.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -376,7 +376,7 @@ export function UsersPage() {
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Eliminar
+              Desvincular
             </Button>
           </DialogFooter>
         </DialogContent>
