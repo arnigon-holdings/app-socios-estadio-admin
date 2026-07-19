@@ -31,13 +31,13 @@ export function TeamsPage() {
 
   const { data, isLoading } = useQuery<{ teams: Team[] }>({
     queryKey: ['teams'],
-    queryFn: () => api.get('/api/v1/admin/teams'),
+    queryFn: () => api.get('/api/admin/teams'),
   })
 
   const teams = data?.teams ?? []
 
   const createMutation = useMutation({
-    mutationFn: (team: TeamForm) => api.post<{ team: Team }>('/api/v1/admin/teams', { team }),
+    mutationFn: (team: TeamForm) => api.post<{ team: Team }>('/api/admin/teams', { team }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] })
       closeDialog()
@@ -47,7 +47,7 @@ export function TeamsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, team }: { id: number; team: TeamForm }) =>
-      api.patch<{ team: Team }>(`/api/v1/admin/teams/${id}`, { team }),
+      api.patch<{ team: Team }>(`/api/admin/teams/${id}`, { team }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] })
       closeDialog()
@@ -56,7 +56,7 @@ export function TeamsPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => api.delete(`/api/v1/admin/teams/${id}`),
+    mutationFn: (id: number) => api.delete(`/api/admin/teams/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] })
       setDeleteTeam(null)

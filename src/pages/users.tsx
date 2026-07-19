@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Loader2, CheckCircle, XCircle, ScanFace } from 'lucide-react'
 import type { User, Pagination, FaceRecord } from '@/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
 
 const STATUS_LABELS: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'secondary' }> = {
   pending_verification: { label: 'Pendiente', variant: 'warning' },
@@ -30,13 +30,13 @@ export function UsersPage() {
   const { data, isLoading } = useQuery<{ users: User[]; pagination: Pagination }>({
     queryKey: ['users', page, rutFilter],
     queryFn: () =>
-      api.get('/api/v1/admin/users', {
+      api.get('/api/admin/users', {
         params: { page, per_page: 20, rut: rutFilter || undefined },
       }),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (userId: number) => api.delete(`/api/v1/admin/users/${userId}`),
+    mutationFn: (userId: number) => api.delete(`/api/admin/users/${userId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setDeleteUser(null)
@@ -45,7 +45,7 @@ export function UsersPage() {
 
   const verifyMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: number; status: string }) =>
-      api.patch(`/api/v1/admin/users/${userId}`, { user: { registration_status: status } }),
+      api.patch(`/api/admin/users/${userId}`, { user: { registration_status: status } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setSelectedUser(null)
@@ -54,7 +54,7 @@ export function UsersPage() {
 
   const faceRecordsQuery = useQuery<{ face_records: FaceRecord[] }>({
     queryKey: ['face-records', selectedUser?.id],
-    queryFn: () => api.get(`/api/v1/admin/users/${selectedUser!.id}/face_records`),
+    queryFn: () => api.get(`/api/admin/users/${selectedUser!.id}/face_records`),
     enabled: !!selectedUser,
   })
 
@@ -357,13 +357,13 @@ export function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Unlink Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Desvincular Usuario</DialogTitle>
+            <DialogTitle>Eliminar Usuario</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de desvincular al usuario {deleteUser?.rut}? Su RUT se borrar&aacute; pero las caras en el sistema permanecer&aacute;n para una posible reasociaci&oacute;n futura.
+              ¿Estás seguro de eliminar al usuario {deleteUser?.rut}? Esta acción eliminará todas sus fotos, caras registradas y datos. No se puede deshacer.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -376,7 +376,7 @@ export function UsersPage() {
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Desvincular
+              Eliminar
             </Button>
           </DialogFooter>
         </DialogContent>

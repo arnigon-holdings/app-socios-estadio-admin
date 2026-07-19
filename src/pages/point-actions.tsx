@@ -32,14 +32,14 @@ export function PointActionsPage() {
 
   const { data, isLoading } = useQuery<{ point_actions: PointAction[] }>({
     queryKey: ['point-actions'],
-    queryFn: () => api.get('/api/v1/admin/point_actions'),
+    queryFn: () => api.get('/api/admin/point_actions'),
   })
 
   const pointActions = data?.point_actions ?? []
 
   const createMutation = useMutation({
     mutationFn: (action: PointActionForm) =>
-      api.post<{ point_action: PointAction }>('/api/v1/admin/point_actions', { point_action: action }),
+      api.post<{ point_action: PointAction }>('/api/admin/point_actions', { point_action: action }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['point-actions'] })
       closeDialog()
@@ -49,7 +49,7 @@ export function PointActionsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, action }: { id: number; action: PointActionForm }) =>
-      api.patch<{ point_action: PointAction }>(`/api/v1/admin/point_actions/${id}`, { point_action: action }),
+      api.patch<{ point_action: PointAction }>(`/api/admin/point_actions/${id}`, { point_action: action }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['point-actions'] })
       closeDialog()
@@ -58,7 +58,7 @@ export function PointActionsPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => api.delete(`/api/v1/admin/point_actions/${id}`),
+    mutationFn: (id: number) => api.delete(`/api/admin/point_actions/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['point-actions'] })
       setDeleteAction(null)

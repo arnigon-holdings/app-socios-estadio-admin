@@ -4,13 +4,36 @@ SPA React 19 + Vite 6 + Tailwind v4 + shadcn/ui + TanStack Query. Lo usan los ad
 
 > **Contexto completo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), [`/SPEC.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/SPEC.md) (en el docs repo).
 
+## Para agentes / LLMs
+
+Ruta de documentación para una IA que aterriza en este repo:
+
+1. **`README.md`** (este archivo) — qué es, quickstart, estructura, rutas, endpoints, decisiones.
+2. **[`CLAUDE.md`](./CLAUDE.md)** — reglas de comportamiento: cómo trabajar aquí, comandos, boundaries, gotchas.
+3. **[`SPEC.md`](./SPEC.md)** — contrato funcional completo (rutas, modelo UI, contratos API, errores, reglas UX).
+
+Documentación transversal del proyecto (polyrepo completo):
+[`arnigon-holdings/app-socios-estadio-docs`](https://github.com/arnigon-holdings/app-socios-estadio-docs) — fuente de verdad de arquitectura, spec global, checklist, infrastructure y entorno.
+
 ## Quickstart
+
+**Opcion A — Docker (recomendada)**:
+
+Desde la raiz del workspace:
+```bash
+docker compose up -d admin
+# admin disponible en http://localhost:5175
+```
+
+**Opcion B — Local (requiere backend corriendo)**:
 
 ```bash
 npm install
 cp .env.example .env.local   # editar con dev tokens (gitignored)
-npm run dev                  # http://localhost:5174
+npm run dev          # http://localhost:5175
 ```
+
+El admin espera que Rails Backend este en `http://localhost:3001` (configurable via `VITE_API_BASE_URL`).
 
 ## Estructura
 
@@ -90,7 +113,6 @@ npm run dev          # vite dev :5174
 npm run build        # tsc + vite build → dist/
 npm run preview      # serve dist/
 npm run lint         # eslint
-npm run test         # playwright
 ```
 
 ## Env vars
@@ -114,7 +136,7 @@ Toda configuración viene de variables de entorno `VITE_*` (expuestas al bundle 
 
 | Var | Requerida | Default dev | Para qué sirve |
 |---|---|---|---|
-| `VITE_API_BASE_URL` | sí | `http://localhost:3000` | URL del backend Rails. Llamadas fetch en `src/lib/api.ts`. |
+| `VITE_API_BASE_URL` | sí | `http://localhost:3001` | URL del backend Rails. Llamadas fetch en `src/lib/api.ts`. |
 
 #### Go face-search service
 
@@ -152,7 +174,7 @@ Estos valores se usan **solo como placeholder** en el form de login. La auth rea
 ## Gotchas
 
 - **El Vite proxy (`/api → localhost:3000`) solo aplica al backend Rails**. Para `/search-face` no hay proxy — el cliente llama directo a `VITE_FACE_SEARCH_URL`. Esto es por diseño (ver [`ARCHITECTURE.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/ARCHITECTURE.md)).
-- **CORS**: el Go service valida `CORS_ORIGINS` env. Para dev debe incluir `http://localhost:5174`.
+- **CORS**: el Go service valida `CORS_ORIGINS` env. Para dev debe incluir `http://localhost:5174` (frontend) y `http://localhost:5175` (admin).
 - **Las URLs presigned de S3 expiran en 1h**. Si el admin deja la página abierta, las imágenes se rompen al refrescar — la búsqueda las regenera.
 - **`VITE_FACE_SEARCH_TOKEN` se expone al bundle**. Es un secret compartido Go ↔ admin. En prod rotarlo regularmente y considerar emisión server-side.
 - **`VITE_ADMIN_PASSWORD`** es solo dev. En prod, eliminar del `.env.local` y usar SSO/IdP si es posible.

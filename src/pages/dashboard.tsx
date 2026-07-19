@@ -32,7 +32,7 @@ function StatCard({ title, value, icon: Icon, description }: {
 export function DashboardPage() {
   const { data, isLoading } = useQuery<{ stats: DashboardStats }>({
     queryKey: ['dashboard'],
-    queryFn: () => api.get('/api/v1/admin/dashboard'),
+    queryFn: () => api.get('/api/admin/dashboard'),
   })
 
   const stats = data?.stats

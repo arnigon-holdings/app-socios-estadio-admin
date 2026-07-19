@@ -91,8 +91,8 @@ export interface FaceSearchMatch {
   rut: string
   phone: string
   confidence: number
-  face_id?: string
-  photo_url?: string
+  faces_count: number
+  photo_urls: string[]
 }
 
 export interface FaceRecord {

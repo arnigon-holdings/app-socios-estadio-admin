@@ -19,7 +19,7 @@ export function AuditLogsPage() {
   const { data, isLoading } = useQuery<{ logs: AuditLog[]; pagination: Pagination }>({
     queryKey: ['audit-logs', page, actionFilter, resourceTypeFilter],
     queryFn: () =>
-      api.get('/api/v1/admin/audit_logs', {
+      api.get('/api/admin/audit_logs', {
         params: {
           page,
           per_page: 20,
