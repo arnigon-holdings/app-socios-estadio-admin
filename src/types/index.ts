@@ -100,9 +100,10 @@ export interface FaceRecord {
   rekognition_face_id: string
   s3_bucket: string
   s3_key: string
-  face_type?: 'reference' | 'audit' | null
+  face_type?: 'reference' | 'audit' | 'liveness' | 'video' | null
   indexed_at: string
   photo_url: string | null
+  fallback_photo_url?: string | null
 }
 
 export interface FaceSearchResponse {

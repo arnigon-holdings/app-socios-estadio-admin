@@ -1,6 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 const FACE_SEARCH_URL = import.meta.env.VITE_FACE_SEARCH_URL || 'http://localhost:8081'
 const FACE_SEARCH_TOKEN = import.meta.env.VITE_FACE_SEARCH_TOKEN || ''
+const isLocalBackend = !API_BASE_URL || API_BASE_URL.includes('localhost')
+const isLocalFaceSearch = !FACE_SEARCH_URL || FACE_SEARCH_URL.includes('localhost')
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>
@@ -9,7 +11,8 @@ interface FetchOptions extends RequestInit {
 async function fetchApi<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { params, ...fetchOptions } = options
 
-  let url = `${API_BASE_URL}${endpoint}`
+  const base = isLocalBackend ? '' : API_BASE_URL
+  let url = `${base}${endpoint}`
 
   if (params) {
     const searchParams = new URLSearchParams()
@@ -54,7 +57,8 @@ async function searchFaceRequest(imageBase64: string): Promise<unknown> {
     ? imageBase64
     : `data:image/jpeg;base64,${imageBase64}`
 
-  const response = await fetch(`${FACE_SEARCH_URL}/search-face`, {
+  const base = isLocalFaceSearch ? '' : FACE_SEARCH_URL
+  const response = await fetch(`${base}/search-face`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -12,7 +12,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Loader2, CheckCircle, XCircle, ScanFace } from 'lucide-react'
 import type { User, Pagination, FaceRecord } from '@/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const assetUrl = (path: string) => API_BASE_URL.includes('localhost') ? path : `${API_BASE_URL}${path}`
+
+const FACE_TYPE_LABELS: Record<string, string> = {
+  liveness: 'Verificación',
+  reference: 'Verificación',
+  audit: 'Verificación',
+  video: 'Video',
+}
 
 const STATUS_LABELS: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'secondary' }> = {
   pending_verification: { label: 'Pendiente', variant: 'warning' },
@@ -123,7 +131,7 @@ export function UsersPage() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <img
-                        src={`${API_BASE_URL}${user.photo_url}`}
+                        src={assetUrl(user.photo_url)}
                         alt="Foto"
                         className="h-10 w-10 rounded-full object-cover bg-muted"
                         onError={(e) => {
@@ -206,7 +214,7 @@ export function UsersPage() {
             <div className="space-y-6">
               <div className="flex items-center gap-6">
                 <img
-                  src={`${API_BASE_URL}${selectedUser.photo_url}`}
+                  src={assetUrl(selectedUser.photo_url)}
                   alt="Foto"
                   className="h-32 w-32 rounded-xl object-cover bg-muted"
                   onError={(e) => {
@@ -326,7 +334,12 @@ export function UsersPage() {
                             alt={`Cara ${face.face_type ?? 'registrada'}`}
                             className="h-full w-full object-cover transition-transform group-hover:scale-105"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none'
+                              const fallbackUrl = face.fallback_photo_url
+                              if (fallbackUrl && e.currentTarget.src !== assetUrl(fallbackUrl)) {
+                                e.currentTarget.src = assetUrl(fallbackUrl)
+                              } else {
+                                e.currentTarget.style.display = 'none'
+                              }
                             }}
                           />
                         ) : (
@@ -336,7 +349,7 @@ export function UsersPage() {
                         )}
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5">
                           <p className="text-xs font-medium text-white capitalize">
-                            {face.face_type ?? 'referencia'}
+                            {FACE_TYPE_LABELS[face.face_type ?? ''] ?? 'Cara registrada'}
                           </p>
                           <p className="text-[10px] text-white/80">
                             {new Date(face.indexed_at).toLocaleDateString('es-CL')}

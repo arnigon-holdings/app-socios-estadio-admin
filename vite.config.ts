@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 const env = loadEnv('development', process.cwd(), 'VITE_')
-const API_BASE = env.VITE_API_BASE_URL ?? 'http://localhost:3001'
+const API_BASE = env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const FACE_SEARCH_URL = env.VITE_FACE_SEARCH_URL ?? 'http://localhost:8081'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -21,6 +22,10 @@ export default defineConfig({
         target: API_BASE,
         changeOrigin: true,
         cookieDomainRewrite: 'localhost',
+      },
+      '/search-face': {
+        target: FACE_SEARCH_URL,
+        changeOrigin: true,
       },
       '/uploads': {
         target: API_BASE,
