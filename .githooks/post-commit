@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# post-commit hook — docs-sync
+# Si el commit tocó código (no solo .md), corre `opencode run` con la skill
+# docs-sync para actualizar la documentación. No bloquea el commit.
+set -u
+
+# Deshabilitar con: DOCS_SYNC_DISABLED=1 git commit ...
+if [ "${DOCS_SYNC_DISABLED:-0}" = "1" ]; then
+  exit 0
+fi
+
+if ! command -v opencode >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Archivos tocados por el commit
+FILES=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || echo "")
+
+# ¿Tocó algo que no sea doc? (guard: commits de solo docs no re-disparan)
+ONLY_DOCS=1
+for f in $FILES; do
+  case "$f" in
+    *.md | .githooks/* | .opencode/* | scripts/install-hooks.sh | Makefile) ;;
+    *) ONLY_DOCS=0 ;;
+  esac
+done
+
+if [ "$ONLY_DOCS" = "1" ]; then
+  exit 0
+fi
+
+SHA=$(git rev-parse --short HEAD)
+LOG="/tmp/docs-sync-$(basename "$PWD").log"
+
+echo "[$(date +%H:%M:%S)] commit $SHA -> docs-sync" >> "$LOG"
+(
+  DOCS_SYNC_DISABLED=1 \
+  nohup opencode run "Post-commit docs-sync ($SHA). Usa la skill docs-sync: revisa el diff de este commit y actualiza la documentación del repo si quedó desactualizada. Deja los cambios en el working tree, no commitees." \
+    >> "$LOG" 2>&1 &
+)
+exit 0
