@@ -1,6 +1,6 @@
 # `admin/` — Panel de Administración
 
-SPA React 19 + Vite 6 + Tailwind v4 + shadcn/ui + TanStack Query. Lo usan los admins del club para gestionar socios, equipos, puntos y buscar caras.
+SPA React 19 + Vite 8 + Tailwind v4 + shadcn/ui + TanStack Query. Lo usan los admins del club para gestionar socios, equipos, puntos y buscar caras.
 
 > **Contexto completo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), [`/SPEC.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/SPEC.md) (en el docs repo).
 
@@ -109,7 +109,7 @@ admin/
 ## Comandos
 
 ```bash
-npm run dev          # vite dev :5174
+npm run dev          # vite dev :5175
 npm run build        # tsc + vite build → dist/
 npm run preview      # serve dist/
 npm run lint         # eslint
