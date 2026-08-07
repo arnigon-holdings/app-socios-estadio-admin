@@ -56,7 +56,7 @@ export function AuditLogsPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
             <div className="space-y-1">
               <Label htmlFor="action" className="text-xs">Acción</Label>
               <Input
@@ -67,7 +67,7 @@ export function AuditLogsPage() {
                   setActionFilter(e.target.value)
                   setPage(1)
                 }}
-                className="w-32"
+                className="w-full sm:w-32"
               />
             </div>
             <div className="space-y-1">
@@ -80,7 +80,7 @@ export function AuditLogsPage() {
                   setResourceTypeFilter(e.target.value)
                   setPage(1)
                 }}
-                className="w-32"
+                className="w-full sm:w-32"
               />
             </div>
           </div>
@@ -134,7 +134,7 @@ export function AuditLogsPage() {
           </Table>
 
           {pagination && pagination.pages > 1 && (
-            <div className="flex items-center justify-between p-4">
+            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Página {pagination.page} de {pagination.pages} ({pagination.total} logs)
               </p>

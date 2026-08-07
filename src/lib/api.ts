@@ -1,8 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 const FACE_SEARCH_URL = import.meta.env.VITE_FACE_SEARCH_URL || 'http://localhost:8081'
 const FACE_SEARCH_TOKEN = import.meta.env.VITE_FACE_SEARCH_TOKEN || ''
-const isLocalBackend = !API_BASE_URL || API_BASE_URL.includes('localhost')
-const isLocalFaceSearch = !FACE_SEARCH_URL || FACE_SEARCH_URL.includes('localhost')
+export const isLocalBackend =
+  !API_BASE_URL ||
+  API_BASE_URL.includes('localhost') ||
+  (API_BASE_URL.includes('://') && !API_BASE_URL.split('://')[1].includes('.'))
+const isLocalFaceSearch =
+  !FACE_SEARCH_URL ||
+  FACE_SEARCH_URL.includes('localhost') ||
+  (FACE_SEARCH_URL.includes('://') && !FACE_SEARCH_URL.split('://')[1].includes('.'))
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>

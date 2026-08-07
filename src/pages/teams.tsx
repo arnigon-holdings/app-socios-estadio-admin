@@ -95,12 +95,12 @@ export function TeamsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Equipos</h1>
           <p className="text-muted-foreground">Gestiona los equipos de fútbol</p>
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} className="self-start sm:self-auto">
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Equipo
         </Button>
@@ -168,7 +168,7 @@ export function TeamsPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>{editingTeam ? 'Editar Equipo' : 'Nuevo Equipo'}</DialogTitle>
             <DialogDescription>
@@ -231,7 +231,7 @@ export function TeamsPage() {
 
       {/* Delete Confirmation */}
       <Dialog open={!!deleteTeam} onOpenChange={() => setDeleteTeam(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>Eliminar Equipo</DialogTitle>
             <DialogDescription>

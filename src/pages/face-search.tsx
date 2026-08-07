@@ -296,13 +296,13 @@ export function FaceSearchPage() {
           </section>
         </div>
 
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>
               {selectedMatch?.rut} — {selectedMatch?.faces_count} caras encontradas
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {selectedMatch?.photo_urls.map((url, i) => (
               <div key={i} className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
                 <img

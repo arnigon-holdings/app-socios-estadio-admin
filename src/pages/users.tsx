@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, isLocalBackend } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +13,7 @@ import { Search, ChevronLeft, ChevronRight, Eye, Trash2, Loader2, CheckCircle, X
 import type { User, Pagination, FaceRecord } from '@/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-const assetUrl = (path: string) => API_BASE_URL.includes('localhost') ? path : `${API_BASE_URL}${path}`
+const assetUrl = (path: string) => (isLocalBackend ? path : `${API_BASE_URL}${path}`)
 
 const FACE_TYPE_LABELS: Record<string, string> = {
   liveness: 'Verificación',
@@ -174,7 +174,7 @@ export function UsersPage() {
           </Table>
 
           {pagination && pagination.pages > 1 && (
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Página {pagination.page} de {pagination.pages} ({pagination.total} usuarios)
               </p>
@@ -205,14 +205,14 @@ export function UsersPage() {
 
       {/* User Detail Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>Detalle de Usuario</DialogTitle>
             <DialogDescription>Información del usuario registrado</DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-6">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
                 <img
                   src={assetUrl(selectedUser.photo_url)}
                   alt="Foto"
@@ -221,7 +221,7 @@ export function UsersPage() {
                     (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + selectedUser.rut + '&background=random&size=128'
                   }}
                 />
-                <div className="space-y-2">
+                <div className="w-full min-w-0 space-y-2 sm:w-auto">
                   <div>
                     <Label className="text-muted-foreground">Estado de registro</Label>
                     <div className="flex items-center gap-2 mt-1">
@@ -261,40 +261,40 @@ export function UsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">ID</Label>
-                  <p className="font-medium">{selectedUser.id}</p>
+                  <p className="font-medium break-words">{selectedUser.id}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">RUT</Label>
-                  <p className="font-medium">{selectedUser.rut}</p>
+                  <p className="font-medium break-words">{selectedUser.rut}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Teléfono</Label>
-                  <p className="font-medium">{selectedUser.phone}</p>
+                  <p className="font-medium break-words">{selectedUser.phone}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Verificación biométrica</Label>
-                  <p className="font-medium capitalize">{selectedUser.biometric_status || 'N/A'}</p>
+                  <p className="font-medium capitalize break-words">{selectedUser.biometric_status || 'N/A'}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Fecha de registro</Label>
-                  <p className="font-medium">
+                  <p className="font-medium break-words">
                     {new Date(selectedUser.created_at).toLocaleString('es-CL')}
                   </p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Código de referido</Label>
-                  <p className="font-medium">{selectedUser.referral_code || 'N/A'}</p>
+                  <p className="font-medium break-words">{selectedUser.referral_code || 'N/A'}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Equipos seleccionados</Label>
-                  <p className="font-medium">{selectedUser.teams_ids?.length ?? 0}</p>
+                  <p className="font-medium break-words">{selectedUser.teams_ids?.length ?? 0}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <Label className="text-muted-foreground">Mes de nacimiento</Label>
-                  <p className="font-medium">{selectedUser.birth_month}/{selectedUser.birth_year}</p>
+                  <p className="font-medium break-words">{selectedUser.birth_month}/{selectedUser.birth_year}</p>
                 </div>
               </div>
 
@@ -372,7 +372,7 @@ export function UsersPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>Eliminar Usuario</DialogTitle>
             <DialogDescription>

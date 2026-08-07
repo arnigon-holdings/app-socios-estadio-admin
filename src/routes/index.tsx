@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
-import { Sidebar } from '@/components/layout'
+import { LayoutWithSidebar } from '@/components/layout'
 import { LoginPage } from '@/pages/login'
 import { DashboardPage } from '@/pages/dashboard'
 import { UsersPage } from '@/pages/users'
@@ -44,17 +44,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>
-}
-
-function LayoutWithSidebar({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6">{children}</div>
-      </main>
-    </div>
-  )
 }
 
 const router = createBrowserRouter([

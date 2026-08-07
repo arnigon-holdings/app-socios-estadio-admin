@@ -102,12 +102,12 @@ export function PointActionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Acciones de Puntos</h1>
           <p className="text-muted-foreground">Configura las acciones que otorgan puntos</p>
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} className="self-start sm:self-auto">
           <Plus className="h-4 w-4 mr-2" />
           Nueva Acción
         </Button>
@@ -185,7 +185,7 @@ export function PointActionsPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>{editingAction ? 'Editar Acción' : 'Nueva Acción'}</DialogTitle>
             <DialogDescription>
@@ -264,7 +264,7 @@ export function PointActionsPage() {
 
       {/* Delete Confirmation */}
       <Dialog open={!!deleteAction} onOpenChange={() => setDeleteAction(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
           <DialogHeader>
             <DialogTitle>Eliminar Acción</DialogTitle>
             <DialogDescription>
